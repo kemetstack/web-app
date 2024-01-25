@@ -2,14 +2,14 @@
   window["env"] = window["env"] || {};
 
   // BackEnd Environment variables
-  window["env"]["fineractApiUrls"] = '';
-  window["env"]["fineractApiUrl"]  = '';
+  window["env"]["fineractApiUrls"] = 'http://kemetx.kemetstack.org:8080';
+  window["env"]["fineractApiUrl"] = 'http://kemetx.kemetstack.org:8080';
 
   window["env"]["apiProvider"] = '';
   window["env"]["apiVersion"]  = '';
 
-  window["env"]["fineractPlatformTenantId"]  = '';
-  window["env"]["fineractPlatformTenantIds"]  = '';
+  window["env"]["fineractPlatformTenantId"] = 'default';
+  window["env"]["fineractPlatformTenantIds"] = 'default';
 
   // Language Environment variables
   window["env"]["defaultLanguage"] = '';
