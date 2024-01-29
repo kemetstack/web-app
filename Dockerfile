@@ -39,7 +39,7 @@ RUN ng build --output-path=/dist $BUILD_ENVIRONMENT_OPTIONS
 FROM $NGINX_IMAGE
 
 # Copy custom Nginx configuration
-COPY --from=builder nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 
 COPY --from=builder /dist /usr/share/nginx/html
 
