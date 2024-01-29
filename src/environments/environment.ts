@@ -15,9 +15,9 @@ export const environment = {
   fineractPlatformTenantIds: window['env']['fineractPlatformTenantIds'] || 'default',
   // For connecting to others servers running elsewhere update the base API URL
   baseApiUrls: window['env']['fineractApiUrls'] ||
-    'http://kemetx.kemetstack.org:8080,http://34.91.178.79:8080,https://localhost:8443',
+    'http://kemetx.kemetstack.org,https://localhost:8443',
   // For connecting to server running elsewhere set the base API URL
-  baseApiUrl: window['env']['baseApiUrl'] || 'http://kemetx.kemetstack.org:8080',
+  baseApiUrl: window['env']['baseApiUrl'] || 'http://kemetx.kemetstack.org',
   allowServerSwitch: env.allow_switching_backend_instance,
   apiProvider: window['env']['apiProvider'] || '/fineract-provider/api',
   apiVersion: window['env']['apiVersion'] || '/v1',

@@ -2,8 +2,8 @@
   window["env"] = window["env"] || {};
 
   // BackEnd Environment variables
-  window["env"]["fineractApiUrls"] = 'http://kemetx.kemetstack.org:8080';
-  window["env"]["fineractApiUrl"] = 'http://kemetx.kemetstack.org:8080';
+  window["env"]["fineractApiUrls"] = 'http://kemetx.kemetstack.org';
+  window["env"]["fineractApiUrl"] = 'http://kemetx.kemetstack.org';
 
   window["env"]["apiProvider"] = '';
   window["env"]["apiVersion"]  = '';
