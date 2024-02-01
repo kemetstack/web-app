@@ -22,8 +22,8 @@ jobs:
     uses: docker/metadata-action@v5
     with:
      # list of Docker images to use as base name for tags
-    images: almbolonzi/web-app      
-    tags: |
+     images: almbolonzi/web-app      
+     tags: |
       type=semver,pattern={{version}}
       type=semver,pattern={{major}}.{{minor}}
       type=semver,pattern={{major}}
