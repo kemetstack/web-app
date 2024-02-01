@@ -18,11 +18,6 @@ jobs:
   steps:
   - name: Checkout
     uses: actions/checkout@v4
-  - name: Get smart tag
-    id: prepare
-    uses: Surgo/docker-smart-tag-action@v1
-    with:
-      docker_image: almbolonzi/web-app
   # - name: Docker meta
   #   id: meta
   #   uses: docker/metadata-action@v5
@@ -59,9 +54,10 @@ jobs:
   #     push: ${{ github.event_name != 'pull_request' }}
   #     tags: ${{ steps.meta.outputs.tags }}
   #     labels: ${{ steps.meta.outputs.labels }}
-  - name: Build and push
-    uses: docker/build-push-action@v5
+  - name: Build and publish Docker image tagged according to a git-tag
+    uses: VaultVulp/gp-docker-action@1.6.0
     with:
-      push: true
-      tags: ${{ steps.prepare.outputs.tag }}
+      github-token: ${{ secrets.DOCKER_GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into the GitHub Packages
+      image-name: almbolonzi/web-app # Provide only Docker image name
+      extract-git-tag: true # Provide flag to extract Docker image tag from git reference
 
