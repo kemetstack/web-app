@@ -22,10 +22,8 @@ jobs:
       uses: docker/metadata-action@v5
       with:
           # list of Docker images to use as base name for tags
-        images: |
-            almbolonzi/web-app           
-          # generate Docker tags based on the following events/attributes
-          tags: |
+        images: almbolonzi/web-app           
+        tags: |
             type=schedule
             type=ref,event=branch
             type=ref,event=pr
