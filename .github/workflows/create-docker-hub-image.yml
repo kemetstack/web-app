@@ -18,21 +18,26 @@ jobs:
   steps:
   - name: Checkout
     uses: actions/checkout@v4
-  - name: Docker meta
-    id: meta
-    uses: docker/metadata-action@v5
+  - name: Get smart tag
+    id: prepare
+    uses: Surgo/docker-smart-tag-action@v1
     with:
-     # list of Docker images to use as base name for tags
-      images: almbolonzi/web-app      
-      tags: |
-        type=schedule
-        type=ref,event=branch
-        type=ref,event=pr
-        type=semver,pattern={{version}}
-        type=semver,pattern={{major}}.{{minor}}
-        type=semver,pattern={{major}}
-        type=sha
-        type=ref,event=tag     
+      docker_image: almbolonzi/web-app
+  # - name: Docker meta
+  #   id: meta
+  #   uses: docker/metadata-action@v5
+  #   with:
+  #    # list of Docker images to use as base name for tags
+  #     images: almbolonzi/web-app      
+  #     tags: |
+  #       type=schedule
+  #       type=ref,event=branch
+  #       type=ref,event=pr
+  #       type=semver,pattern={{version}}
+  #       type=semver,pattern={{major}}.{{minor}}
+  #       type=semver,pattern={{major}}
+  #       type=sha
+  #       type=ref,event=tag     
   - name: Set up QEMU
     uses: docker/setup-qemu-action@v3
   #- name: Build the Docker image
@@ -47,11 +52,16 @@ jobs:
       password: ${{ secrets.DOCKERHUB_TOKEN }}
   #- name: Push docker image
    #run: docker push almbolonzi/web-app:latest
+  # - name: Build and push
+  #   uses: docker/build-push-action@v5
+  #   with:
+  #     context: .
+  #     push: ${{ github.event_name != 'pull_request' }}
+  #     tags: ${{ steps.meta.outputs.tags }}
+  #     labels: ${{ steps.meta.outputs.labels }}
   - name: Build and push
     uses: docker/build-push-action@v5
     with:
-      context: .
-      push: ${{ github.event_name != 'pull_request' }}
-      tags: ${{ steps.meta.outputs.tags }}
-      labels: ${{ steps.meta.outputs.labels }}
+      push: true
+      tags: ${{ steps.prepare.outputs.tag }}
 
