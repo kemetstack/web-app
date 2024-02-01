@@ -17,38 +17,46 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Docker meta
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
+    - name: Extract tag name
+      run: |
+        tag_name=${{ github.event.ref }}
+        if [[ <span class="math-inline">\{tag\_name\} \=\~ ^refs/tags/ \]\]; then
+        tag_name="{tag_name##refs/tags/}"
+        fi
+        echo "TAG_NAME=$tag_name" >> $HOME/.env
+    #- name: Docker meta
+    #  id: meta
+    #  uses: docker/metadata-action@v5
+    #  with:
           # list of Docker images to use as base name for tags
-        images: almbolonzi/web-app           
-        tags: |
-            type=schedule
-            type=ref,event=tag
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha            
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-    #- name: Build the Docker image
-      #run: docker build . --file Dockerfile --tag almbolonzi/web-app:latest
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+    #    images: almbolonzi/web-app           
+    #    tags: |
+    #        almbolonzi/web-app:$TAG_NAME
+    #        type=schedule
+    #        type=ref,event=branch
+    #        type=ref,event=pr
+    #        type=semver,pattern={{version}}
+    #        type=semver,pattern={{major}}.{{minor}}
+    #        type=semver,pattern={{major}}
+    #        type=sha            
+    #- name: Set up QEMU
+    #  uses: docker/setup-qemu-action@v3
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag almbolonzi/web-app:$TAG_NAME
+    #- name: Set up Docker Buildx
+    #  uses: docker/setup-buildx-action@v3
     - name: Docker login
       if: github.event_name != 'pull_request'
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    #- name: Push docker image
-      #run: docker push almbolonzi/web-app:latest
-    - name: Build and push
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+    - name: Push docker image
+      run: docker push almbolonzi/web-app:$TAG_NAME
+    #- name: Build and push
+    #  uses: docker/build-push-action@v5
+    #  with:
+    #    context: .
+    #    push: ${{ github.event_name != 'pull_request' }}
+    #    tags: ${{ steps.meta.outputs.tags }}
+    #    labels: ${{ steps.meta.outputs.labels }}
