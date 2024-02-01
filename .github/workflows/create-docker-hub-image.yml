@@ -17,13 +17,14 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      
     - name: Extract tag name
       run: |
-        tag_name=${{ github.event.ref }}
-        if [[ <span class="math-inline">\{tag\_name\} \=\~ ^refs/tags/ \]\]; then
-        tag_name="{tag_name##refs/tags/}"
-        fi
-        echo "TAG_NAME=$tag_name" >> $HOME/.env
+          tag_name=${{ github.event.ref }}
+          if [[ ${tag_name} =~ ^refs/tags/ ]]; then
+            tag_name="${tag_name##refs/tags/}"
+          fi
+          echo "TAG_NAME=$tag_name" >> $HOME/.env
     #- name: Docker meta
     #  id: meta
     #  uses: docker/metadata-action@v5
