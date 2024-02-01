@@ -20,7 +20,7 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag almbolonzi/web-app:${{ steps.version.outputs.tag }}
     - name: Docker tag as latest
-      run: docker tag almbolonzi/web-self-service-app:${{ steps.version.outputs.tag }} almbolonzi/web-app:latest
+      run: docker tag almbolonzi/web-app:${{ steps.version.outputs.tag }} almbolonzi/web-app:latest
     - name: Docker login
       uses: docker/login-action@v2
       with:
