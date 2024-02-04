@@ -18,9 +18,8 @@ jobs:
   steps:
   - name: Checkout
     uses: actions/checkout@v4
-  - name: Generate Docker tag
-    uses: docker/tag-from-github-ref@v1
-    id: tag-image
+  - name: Extract tag
+    run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/tags/})"
   - name: Docker meta
     id: meta
     uses: docker/metadata-action@v5
@@ -52,6 +51,6 @@ jobs:
     with:
       context: .
       push: ${{ github.event_name != 'pull_request' }}
-      tags: ${{ steps.tag-image.outputs.tags }}
+      tags: ${{ steps.extract-tag.outputs.tag }}
       labels: ${{ steps.meta.outputs.labels }}
 
