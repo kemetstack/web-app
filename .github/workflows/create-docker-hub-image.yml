@@ -21,6 +21,8 @@ jobs:
   - uses: actions/github-script@v6
     with:
       script: |
+        import { fileContents } from '@actions/github/lib/utils';
+        
         const version = JSON.parse(fileContents('package.json')).version;
   - name: Docker meta
     id: meta
