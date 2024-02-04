@@ -19,7 +19,7 @@ jobs:
       - name: Set Tag
         id: set_tag
         run: |
-          TAG=$(echo $GITHUB_REF | sed -n 's/refs\/tags\/v\\([0-9]*.[0-9]*.[0-9]*\\)/\\1/p')
+          TAG=$(echo $GITHUB_REF | sed -n 's/refs\/tags\/v\([0-9]*\.[0-9]*\.[0-9]*\)/\1/p')
           if [ -n "$TAG" ]; then
             echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
           else
