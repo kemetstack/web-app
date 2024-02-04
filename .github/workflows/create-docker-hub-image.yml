@@ -18,8 +18,7 @@ jobs:
   steps:
   - name: Checkout
     uses: actions/checkout@v4
-  - name: Extract tag
-    run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/tags/})"
+  
   - name: Docker meta
     id: meta
     uses: docker/metadata-action@v5
@@ -51,6 +50,6 @@ jobs:
     with:
       context: .
       push: ${{ github.event_name != 'pull_request' }}
-      tags: ${{ steps.extract-tag.outputs.tag }}
+      tags: ${{ github.ref }}
       labels: ${{ steps.meta.outputs.labels }}
 
