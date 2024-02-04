@@ -18,12 +18,13 @@ jobs:
   steps:
   - name: Checkout
     uses: actions/checkout@v4
-  - uses: actions/github-script@v6
-    with:
-      script: |
-        import { fileContents } from '@actions/github/lib/utils';
-        
-        const version = JSON.parse(fileContents('package.json')).version;
+  - name: Get tag version
+    run: |
+      # Strip git ref prefix from version
+      VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+      # Strip "v" prefix from tag name
+      [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+      # Use Docker `latest` tag convention
   - name: Docker meta
     id: meta
     uses: docker/metadata-action@v5
