@@ -5,59 +5,55 @@ on:
  push:
   branches: [ "develop" ]
   tags:
-   - "*"
+   - "v*.*.*"
  pull_request:
   branches: [ "develop" ]
 
 jobs:
 
- build-and-publish-head:
+ build:
 
   runs-on: ubuntu-latest
 
   steps:
   - name: Checkout
-    uses: actions/checkout@v2.5.0 # Checking out the repo
-  # - name: Docker meta
-  #   id: meta
-  #   uses: docker/metadata-action@v5
-  #   with:
-  #    # list of Docker images to use as base name for tags
-  #     images: almbolonzi/web-app      
-  #     tags: |
-  #       type=schedule
-  #       type=ref,event=branch
-  #       type=ref,event=pr
-  #       type=semver,pattern={{version}}
-  #       type=semver,pattern={{major}}.{{minor}}
-  #       type=semver,pattern={{major}}
-  #       type=sha
-  #       type=ref,event=tag     
-  #- name: Set up QEMU
-  #  uses: docker/setup-qemu-action@v3
+    uses: actions/checkout@v4
+  - name: Docker meta
+    id: meta
+    uses: docker/metadata-action@v5
+    with:
+     # list of Docker images to use as base name for tags
+      images: almbolonzi/web-app      
+      tags: |
+        type=schedule
+        type=ref,event=branch
+        type=ref,event=pr
+        type=semver,pattern={{version}}
+        type=semver,pattern={{major}}.{{minor}}
+        type=semver,pattern={{major}}
+        type=sha
+        type=ref,event=${{ github.ref_name }}
+
+  - name: Set up QEMU
+    uses: docker/setup-qemu-action@v3
   #- name: Build the Docker image
    #run: docker build . --file Dockerfile --tag almbolonzi/web-app:latest
-  #- name: Set up Docker Buildx
-  #  uses: docker/setup-buildx-action@v3
-  # - name: Docker login
-  #   if: github.event_name != 'pull_request'
-  #   uses: docker/login-action@v3
-  #   with:
-  #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+  - name: Set up Docker Buildx
+    uses: docker/setup-buildx-action@v3
+    
+  - name: Docker login
+    if: github.event_name != 'pull_request'
+    uses: docker/login-action@v3
+    with:
+      username: ${{ secrets.DOCKERHUB_USERNAME }}
+      password: ${{ secrets.DOCKERHUB_TOKEN }}
   #- name: Push docker image
    #run: docker push almbolonzi/web-app:latest
-  # - name: Build and push
-  #   uses: docker/build-push-action@v5
-  #   with:
-  #     context: .
-  #     push: ${{ github.event_name != 'pull_request' }}
-  #     tags: ${{ steps.meta.outputs.tags }}
-  #     labels: ${{ steps.meta.outputs.labels }}
-  - name: Build and publish Docker image tagged according to a git-tag
-    uses: VaultVulp/gp-docker-action@1.6.0
+  - name: Build and push
+    uses: docker/build-push-action@v5
     with:
-      github-token: ${{ secrets.DOCKER_GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into the GitHub Packages
-      image-name: web-app # Provide only Docker image name
-      extract-git-tag: true # Provide flag to extract Docker image tag from git reference
+      context: .
+      push: ${{ github.event_name != 'pull_request' }}
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
 
