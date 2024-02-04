@@ -18,18 +18,6 @@ jobs:
   - name: Checkout
     uses: actions/checkout@v4
   
-  - name: Set Tag
-    id: set_tag
-    run: |
-      echo "GITHUB_REF: $GITHUB_REF"
-        TAG=$(echo $GITHUB_REF | sed -n 's|^refs/tags/v\([0-9]*\.[0-9]*\.[0-9]*\)$|\1|p')
-      if [ -n "$TAG" ]; then
-        echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
-      else
-        echo "Error: Couldn't extract tag from GITHUB_REF"
-      exit 1
-      fi
-
   - name: Docker meta
     id: meta
     uses: docker/metadata-action@v5
@@ -37,7 +25,7 @@ jobs:
      # list of Docker images to use as base name for tags
       images: almbolonzi/web-app      
       tags: |
-        type=semver,pattern=${IMAGE_TAG}
+        type=semver,pattern={{version}}
         type=semver,pattern={{major}}.{{minor}}
         type=semver,pattern={{major}}
 
