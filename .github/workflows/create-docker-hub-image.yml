@@ -28,7 +28,7 @@ jobs:
      # list of Docker images to use as base name for tags
       images: almbolonzi/web-app      
       tags: |
-        type=semver,pattern=${{ env.IMAGE_TAG }}
+        type=semver,pattern=${{ IMAGE_TAG }}
         type=semver,pattern={{major}}.{{minor}}
         type=semver,pattern={{major}}
 
