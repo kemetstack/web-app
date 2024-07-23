@@ -1,5 +1,16 @@
 {
   "projects": {
     "default": "kemetx-f8e5b"
-  }
+  },
+  "targets": {
+    "kemetx-f8e5b": {
+      "hosting": {
+        "dist/web-app": [
+          "."
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }
