@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "target": "dev",
+    "target": "development",
     "source": ".",
     "ignore": [
       "firebase.json",
