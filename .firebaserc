@@ -5,9 +5,6 @@
   "targets": {
     "kemetx-f8e5b": {
       "hosting": {
-        "dist/web-app": [
-          "."
-        ],
         "development": [
           "web-app"
         ]
