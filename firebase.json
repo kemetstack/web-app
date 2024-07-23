@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "dist/web-app",
     "source": ".",
     "ignore": [
       "firebase.json",
