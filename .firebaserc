@@ -7,6 +7,9 @@
       "hosting": {
         "dist/web-app": [
           "."
+        ],
+        "dev": [
+          "web-app"
         ]
       }
     }
