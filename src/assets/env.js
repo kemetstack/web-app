@@ -2,8 +2,8 @@
   window["env"] = window["env"] || {};
 
   // BackEnd Environment variables
-  window["env"]["fineractApiUrls"] = 'https://kemetx.kemetstax.org';
-  window["env"]["fineractApiUrl"] = 'https://kemetx.kemetstax.org';
+  window["env"]["fineractApiUrls"] = 'http://localhost:8080,https://kemetx.kemetstax.org';
+  window["env"]["fineractApiUrl"] = 'http://localhost:8080';
 
   window["env"]["apiProvider"] = '';
   window["env"]["apiVersion"]  = '';
