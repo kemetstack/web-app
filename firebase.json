@@ -1,5 +1,7 @@
 {
   "hosting": {
+    "site": "kemetx-f8e5b",
+    "target": "development",
     "source": ".",
     "ignore": [
       "firebase.json",
