@@ -2,8 +2,8 @@
   window["env"] = window["env"] || {};
 
   // BackEnd Environment variables
-  window["env"]["fineractApiUrls"] = 'http://localhost:8080,https://kemetx.kemetstax.org';
-  window["env"]["fineractApiUrl"] = 'http://localhost:8080';
+  window["env"]["fineractApiUrls"] = 'https://piglet-engaging-mako.ngrok-free.app';
+  window["env"]["fineractApiUrl"] = 'https://piglet-engaging-mako.ngrok-free.app';
 
   window["env"]["apiProvider"] = '';
   window["env"]["apiVersion"]  = '';
