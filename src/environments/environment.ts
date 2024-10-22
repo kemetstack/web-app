@@ -17,8 +17,7 @@ export const environment = {
   fineractPlatformTenantId: window['env']['fineractPlatformTenantId'] || 'default',
   fineractPlatformTenantIds: window['env']['fineractPlatformTenantIds'] || 'default',
   // For connecting to others servers running elsewhere update the base API URL
-  baseApiUrls: window['env']['fineractApiUrls'] ||
-    'https://api.vuna.io',
+  baseApiUrls: window['env']['fineractApiUrls'] || 'https://api.vuna.io',
   // For connecting to server running elsewhere set the base API URL
   baseApiUrl: window['env']['baseApiUrl'] || 'https://api.vuna.io',
   allowServerSwitch: env.allow_switching_backend_instance,
