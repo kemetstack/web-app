@@ -2,8 +2,8 @@
   window["env"] = window["env"] || {};
 
   // BackEnd Environment variables
-  window["env"]["fineractApiUrls"] = 'https://piglet-engaging-mako.ngrok-free.app';
-  window["env"]["fineractApiUrl"] = 'https://piglet-engaging-mako.ngrok-free.app';
+  window["env"]["fineractApiUrls"] = 'https://api.vuna.io';
+  window["env"]["fineractApiUrl"] = 'https://api.vuna.io';
 
   window["env"]["apiProvider"] = '';
   window["env"]["apiVersion"]  = '';
