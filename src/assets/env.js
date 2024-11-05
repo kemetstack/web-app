@@ -8,8 +8,8 @@
   window["env"]["apiProvider"] = '';
   window["env"]["apiVersion"]  = '';
 
-  window["env"]["fineractPlatformTenantId"] = 'kemetx';
-  window["env"]["fineractPlatformTenantIds"] = 'kemetx';
+  window["env"]["fineractPlatformTenantId"] = ['kemetx'];
+  window["env"]["fineractPlatformTenantIds"] = ['kemetx'];
 
   // Language Environment variables
   window["env"]["defaultLanguage"] = '';
