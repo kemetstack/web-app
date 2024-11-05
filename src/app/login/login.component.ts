@@ -77,8 +77,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     window.location.reload();
   }
 
-  displayTenantSelector(): boolean {
-    return environment.displayTenantSelector === 'false' ? false : true;
-  }
+  // displayTenantSelector(): boolean {
+  //   return environment.displayTenantSelector === 'false' ? false : true;
+  // }
 
 }
