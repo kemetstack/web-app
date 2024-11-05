@@ -3,9 +3,23 @@
 @mixin account-view-component-theme($theme) {
   $primary: map-get($theme, primary);
 
+  mifosx-view-bulk-import {
+    .cover {
+      background-color: white;
+      margin-top: 1%;
+    }
+  }
+
+  mifosx-clients {
+    .status {
+      color: black;
+    }
+  }
+
   mifosx-clients-view,
   mifosx-fixed-deposit-account-view,
   mifosx-loans-view,
+  mifosx-shares-account-view,
   mifosx-recurring-deposits-account-view,
   mifosx-savings-account-view {
     .account-card {
@@ -41,6 +55,9 @@
           .profile-image {
             object-fit: cover;
             border-radius: 20px;
+          }
+          .signature {
+            background-color: mat.get-color-from-palette($primary, 500);
           }
         }
         .account-actions {

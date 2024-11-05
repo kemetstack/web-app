@@ -20,7 +20,9 @@
   </div>
 
   <div [hidden]="!existsClientsToFilter">
-    <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
+    <div *ngIf="isLoading">
+      <div class="loading"></div>
+    </div>
     <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortChanged($event)">
 
       <!-- Name Column -->
@@ -31,7 +33,7 @@
 
       <!-- Account no Column -->
       <ng-container matColumnDef="accountNumber">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> {{"labels.inputs.Account No" | translate}}. </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> {{"labels.inputs.Account No" | translate}}</th>
         <td mat-cell *matCellDef="let row">
           <mifosx-account-number display="left" accountNo="{{row.accountNumber}}"></mifosx-account-number>
         </td>

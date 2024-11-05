@@ -1,9 +1,10 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { DelinquencyBucket, LoanProduct } from '../../models/loan-product.model';
 import { AccountingMapping, Charge, ChargeToIncomeAccountMapping, GLAccount, PaymentChannelToFundSourceMapping, PaymentType, PaymentTypeOption } from '../../../../shared/models/general.model';
-import { AdvancePaymentAllocationData, PaymentAllocation } from '../../loan-product-stepper/loan-product-payment-strategy-step/payment-allocation-model';
+import { AdvancePaymentAllocationData, CreditAllocation, PaymentAllocation } from '../../loan-product-stepper/loan-product-payment-strategy-step/payment-allocation-model';
 import { LoanProducts } from '../../loan-products';
-import { CodeName, OptionData } from '../../../../shared/models/option-data.model';
+import { CodeName, OptionData, StringEnumOptionData } from '../../../../shared/models/option-data.model';
+import { Accounting } from 'app/core/utils/accounting';
 
 @Component({
   selector: 'mifosx-loan-product-summary',
@@ -17,12 +18,14 @@ export class LoanProductSummaryComponent implements OnInit, OnChanges {
   @Input() loanProductsTemplate: any | null;
   @Input() useDueForRepaymentsConfigurations: boolean;
   @Input() paymentAllocations: PaymentAllocation | null;
+  @Input() creditAllocations: CreditAllocation | null;
+  @Input() supportedInterestRefundTypes: StringEnumOptionData[] | null;
 
   variationsDisplayedColumns: string[] = ['valueConditionType', 'borrowerCycleNumber', 'minValue', 'defaultValue', 'maxValue'];
   chargesDisplayedColumns: string[] = ['name', 'chargeCalculationType', 'amount', 'chargeTimeType'];
   paymentFundSourceDisplayedColumns: string[] = ['paymentTypeId', 'fundSourceAccountId'];
   feesPenaltyIncomeDisplayedColumns: string[] = ['chargeId', 'incomeAccountId'];
-  accountingRuleData = ['None', 'Cash', 'Accrual (periodic)', 'Accrual (upfront)'];
+  accountingRuleData: string[] = [];
 
   isAdvancedPaymentAllocation = false;
 
@@ -33,9 +36,10 @@ export class LoanProductSummaryComponent implements OnInit, OnChanges {
   feeToIncomeAccountMappings: ChargeToIncomeAccountMapping[] = [];
   penaltyToIncomeAccountMappings: ChargeToIncomeAccountMapping[] = [];
 
-  constructor() { }
+  constructor(private accounting: Accounting) { }
 
   ngOnInit() {
+    this.accountingRuleData = this.accounting.getAccountingRulesForLoans();
     this.setCurrentValues();
   }
 
@@ -94,6 +98,7 @@ export class LoanProductSummaryComponent implements OnInit, OnChanges {
           'overpaymentLiabilityAccount': this.glAccountLookUp(this.loanProduct.overpaymentLiabilityAccountId, liabilityAccountData),
         };
 
+        this.paymentChannelToFundSourceMappings = [];
         if (this.loanProduct.paymentChannelToFundSourceMappings?.length > 0) {
           const paymentTypesData = this.loanProductsTemplate.paymentTypeOptions || [];
           this.loanProduct.paymentChannelToFundSourceMappings.forEach((m: any) => {
@@ -153,6 +158,11 @@ export class LoanProductSummaryComponent implements OnInit, OnChanges {
       optionValue = this.optionDataLookUp(this.loanProduct.interestCalculationPeriodType, this.loanProductsTemplate.interestCalculationPeriodTypeOptions);
       this.loanProduct.interestCalculationPeriodType = optionValue;
 
+      if (!this.loanProduct.repaymentFrequencyType || !this.loanProduct.repaymentFrequencyType.value) {
+        optionValue = this.optionDataLookUp(this.loanProduct.repaymentFrequencyType, this.loanProductsTemplate.repaymentFrequencyTypeOptions);
+        this.loanProduct.repaymentFrequencyType = optionValue;
+      }
+
       optionValue = this.optionDataLookUp(this.loanProduct.daysInMonthType, this.loanProductsTemplate.daysInMonthTypeOptions);
       this.loanProduct.daysInMonthType = optionValue;
       optionValue = this.optionDataLookUp(this.loanProduct.daysInYearType, this.loanProductsTemplate.daysInYearTypeOptions);
@@ -185,15 +195,23 @@ export class LoanProductSummaryComponent implements OnInit, OnChanges {
     }
 
     if (this.loanProduct.advancedPaymentAllocationTransactionTypes) {
+      const advancedAllocationTransactionTypes: OptionData[] = this.loanProduct.advancedPaymentAllocationTransactionTypes
+        .concat(this.loanProduct.creditAllocationTransactionTypes);
+      const advancedPaymentAllocationTypes: OptionData[] = this.loanProduct.advancedPaymentAllocationTypes
+        .concat(this.loanProduct.creditAllocationAllocationTypes);
       this.advancePaymentAllocationData = {
-        transactionTypes: this.loanProduct.advancedPaymentAllocationTransactionTypes,
-        allocationTypes: this.loanProduct.advancedPaymentAllocationTypes,
+        transactionTypes: advancedAllocationTransactionTypes,
+        allocationTypes: advancedPaymentAllocationTypes,
         futureInstallmentAllocationRules: this.loanProduct.advancedPaymentAllocationFutureInstallmentAllocationRules
       };
     } else {
+      const advancedAllocationTransactionTypes: OptionData[] = this.loanProductsTemplate.advancedPaymentAllocationTransactionTypes
+        .concat(this.loanProductsTemplate.creditAllocationTransactionTypes);
+      const advancedPaymentAllocationTypes: OptionData[] = this.loanProductsTemplate.advancedPaymentAllocationTypes
+        .concat(this.loanProductsTemplate.creditAllocationAllocationTypes);
       this.advancePaymentAllocationData = {
-        transactionTypes: this.loanProductsTemplate.advancedPaymentAllocationTransactionTypes,
-        allocationTypes: this.loanProductsTemplate.advancedPaymentAllocationTypes,
+        transactionTypes: advancedAllocationTransactionTypes,
+        allocationTypes: advancedPaymentAllocationTypes,
         futureInstallmentAllocationRules: this.loanProductsTemplate.advancedPaymentAllocationFutureInstallmentAllocationRules
       };
     }
@@ -297,6 +315,10 @@ export class LoanProductSummaryComponent implements OnInit, OnChanges {
       this.loanProduct.accountingRule.id : this.loanProduct.accountingRule;
   }
 
+  get isAccountingAccrualBased(): boolean {
+    return this.accountingRule() === 3 || this.accountingRule() === 4;
+  }
+
   isAccountingEnabled(): boolean {
     return (this.accountingRule() >= 2);
   }
@@ -305,6 +327,14 @@ export class LoanProductSummaryComponent implements OnInit, OnChanges {
     return (this.loanProduct.paymentChannelToFundSourceMappings?.length > 0
       || this.loanProduct.feeToIncomeAccountMappings?.length > 0
       || this.loanProduct.penaltyToIncomeAccountMappings?.length > 0);
+  }
+
+  getAccountingRuleName(value: string): string {
+    return this.accounting.getAccountRuleName(value.toUpperCase());
+  }
+
+  mapHumanReadableValueStringEnumOptionDataList(incomingParameter: StringEnumOptionData[]): string[] {
+    return incomingParameter.map(v => v.value);
   }
 
 }

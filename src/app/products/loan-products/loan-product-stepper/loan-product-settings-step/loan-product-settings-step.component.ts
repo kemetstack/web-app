@@ -4,6 +4,7 @@ import { LoanProducts } from '../../loan-products';
 import { rangeValidator } from 'app/shared/validators/percentage.validator';
 import { GlobalConfiguration } from 'app/system/configurations/global-configurations-tab/configuration.model';
 import { CodeName, OptionData } from 'app/shared/models/option-data.model';
+import { ProcessingStrategyService } from '../../services/processing-strategy.service';
 
 
 @Component({
@@ -31,7 +32,8 @@ export class LoanProductSettingsStepComponent implements OnInit {
   daysInYearTypeData: any;
   daysInMonthTypeData: any;
   preClosureInterestCalculationStrategyData: any;
-  rescheduleStrategyTypeData: any;
+  rescheduleStrategyTypeData: OptionData[];
+  rescheduleStrategyTypeDataBase: OptionData[];
   interestRecalculationCompoundingTypeData: any;
   interestRecalculationFrequencyTypeData: any;
   interestRecalculationNthDayTypeData: any;
@@ -42,11 +44,14 @@ export class LoanProductSettingsStepComponent implements OnInit {
   loanScheduleProcessingTypeData: OptionData[] = [];
   isAdvancedTransactionProcessingStrategy = false;
   advancedTransactionProcessingStrategyDisabled = true;
+  useDueForRepaymentsConfigurations = false;
+  rescheduleStrategyTypeDisabled = false;
 
   /** Values to Days for Repayments */
   defaultConfigValues: GlobalConfiguration[] = [];
 
-  constructor(private formBuilder: UntypedFormBuilder) {
+  constructor(private formBuilder: UntypedFormBuilder,
+    private processingStrategyService: ProcessingStrategyService) {
     this.createLoanProductSettingsForm();
     this.setConditionalControls();
   }
@@ -70,6 +75,7 @@ export class LoanProductSettingsStepComponent implements OnInit {
     this.daysInMonthTypeData = this.loanProductsTemplate.daysInMonthTypeOptions;
     this.preClosureInterestCalculationStrategyData = this.loanProductsTemplate.preClosureInterestCalculationStrategyOptions;
     this.rescheduleStrategyTypeData = this.loanProductsTemplate.rescheduleStrategyTypeOptions;
+    this.rescheduleStrategyTypeDataBase = this.loanProductsTemplate.rescheduleStrategyTypeOptions;
     this.interestRecalculationCompoundingTypeData = this.loanProductsTemplate.interestRecalculationCompoundingTypeOptions;
     this.interestRecalculationFrequencyTypeData = this.loanProductsTemplate.interestRecalculationFrequencyTypeOptions;
     this.interestRecalculationNthDayTypeData = this.loanProductsTemplate.interestRecalculationNthDayTypeOptions;
@@ -79,6 +85,8 @@ export class LoanProductSettingsStepComponent implements OnInit {
     this.delinquencyBucketData = this.loanProductsTemplate.delinquencyBucketOptions;
     this.loanScheduleTypeData = this.loanProductsTemplate.loanScheduleTypeOptions;
     this.loanScheduleProcessingTypeData = this.loanProductsTemplate.loanScheduleProcessingTypeOptions;
+
+    // this.useDueForRepaymentsConfigurations = (!this.loanProduct.dueDaysForRepaymentEvent && !this.loanProduct.overDueDaysForRepaymentEvent);
 
     const transactionProcessingStrategyCode: string = this.loanProductsTemplate.transactionProcessingStrategyCode || this.transactionProcessingStrategyData[0].code;
     this.loanProductSettingsForm.patchValue({
@@ -112,14 +120,13 @@ export class LoanProductSettingsStepComponent implements OnInit {
       'enableDownPayment': this.loanProductsTemplate.enableDownPayment,
       'enableInstallmentLevelDelinquency': this.loanProductsTemplate.enableInstallmentLevelDelinquency,
       'loanScheduleType': this.loanProductsTemplate.loanScheduleType.code,
+      'useDueForRepaymentsConfigurations': this.loanProductsTemplate.useDueForRepaymentsConfigurations,
+      'allowAccrualPostingInArrears': this.loanProductsTemplate.allowAccrualPostingInArrears
     });
 
     this.isAdvancedTransactionProcessingStrategy = LoanProducts.isAdvancedPaymentAllocationStrategy(transactionProcessingStrategyCode);
-    if (this.isAdvancedTransactionProcessingStrategy) {
-      this.loanProductSettingsForm.addControl('loanScheduleProcessingType', new UntypedFormControl(
-        this.loanProductsTemplate.loanScheduleProcessingType.code || LoanProducts.LOAN_SCHEDULE_PROCESSING_TYPE_HORIZONTAL,
-        [Validators.required ]));
-    }
+    this.processingStrategyService.initialize(this.isAdvancedTransactionProcessingStrategy);
+    this.validateAdvancedPaymentStrategyControls();
 
     if (this.loanProductsTemplate.dueDaysForRepaymentEvent != null &&
       this.loanProductsTemplate.overDueDaysForRepaymentEvent != null) {
@@ -138,7 +145,7 @@ export class LoanProductSettingsStepComponent implements OnInit {
 
     if (this.loanProductsTemplate.delinquencyBucket) {
       this.loanProductSettingsForm.patchValue({
-        'delinquencyBucketId': this.loanProductsTemplate.delinquencyBucket.id
+        'delinquencyBucketId': this.loanProductsTemplate.delinquencyBucket.id > 0 ? this.loanProductsTemplate.delinquencyBucket.id : null
       });
     }
 
@@ -243,6 +250,7 @@ export class LoanProductSettingsStepComponent implements OnInit {
       'dueDaysForRepaymentEvent': [''],
       'overDueDaysForRepaymentEvent': [''],
       'loanScheduleType': [LoanProducts.LOAN_SCHEDULE_TYPE_CUMULATIVE, Validators.required],
+      'allowAccrualPostingInArrears': [false]
     });
   }
 
@@ -275,7 +283,9 @@ export class LoanProductSettingsStepComponent implements OnInit {
           this.loanProductSettingsForm.addControl('interestRecalculationCompoundingMethod', new UntypedFormControl(this.interestRecalculationCompoundingTypeData[0].id, Validators.required));
           this.loanProductSettingsForm.addControl('recalculationRestFrequencyType', new UntypedFormControl(this.interestRecalculationFrequencyTypeData[0].id, Validators.required));
           this.loanProductSettingsForm.addControl('isArrearsBasedOnOriginalSchedule', new UntypedFormControl(''));
-
+          if (this.loanProductSettingsForm.value.isInterestRecalculationEnabled) {
+            this.setRescheduleStrategies();
+          }
           this.loanProductSettingsForm.get('interestRecalculationCompoundingMethod').valueChanges
             .subscribe((interestRecalculationCompoundingMethod: any) => {
               if (interestRecalculationCompoundingMethod !== 0) {
@@ -392,11 +402,9 @@ export class LoanProductSettingsStepComponent implements OnInit {
         if (enableDownPayment) {
           this.loanProductSettingsForm.addControl('disbursedAmountPercentageForDownPayment', new UntypedFormControl(0, [Validators.required, rangeValidator(0, 100) ]));
           this.loanProductSettingsForm.addControl('enableAutoRepaymentForDownPayment', new UntypedFormControl(false, []));
-          this.loanProductSettingsForm.addControl('disableScheduleExtensionForDownPayment', new UntypedFormControl(false, []));
         } else {
           this.loanProductSettingsForm.removeControl('disbursedAmountPercentageForDownPayment');
           this.loanProductSettingsForm.removeControl('enableAutoRepaymentForDownPayment');
-          this.loanProductSettingsForm.removeControl('disableScheduleExtensionForDownPayment');
         }
       });
 
@@ -404,12 +412,8 @@ export class LoanProductSettingsStepComponent implements OnInit {
       .subscribe((transactionProcessingStrategyCode: string) => {
         this.advancePaymentStrategy.emit(transactionProcessingStrategyCode);
         this.isAdvancedTransactionProcessingStrategy =  LoanProducts.isAdvancedPaymentAllocationStrategy(transactionProcessingStrategyCode);
-        if (this.isAdvancedTransactionProcessingStrategy) {
-          this.loanProductSettingsForm.addControl('loanScheduleProcessingType', new UntypedFormControl(
-            this.loanProductsTemplate.loanScheduleProcessingType.code || LoanProducts.LOAN_SCHEDULE_PROCESSING_TYPE_HORIZONTAL, [Validators.required]));
-        } else {
-          this.loanProductSettingsForm.removeControl('loanScheduleProcessingType');
-        }
+        this.processingStrategyService.initialize(this.isAdvancedTransactionProcessingStrategy);
+        this.validateAdvancedPaymentStrategyControls();
       });
 
     this.loanProductSettingsForm.get('allowAttributeConfiguration').valueChanges
@@ -483,7 +487,31 @@ export class LoanProductSettingsStepComponent implements OnInit {
         });
         this.isAdvancedTransactionProcessingStrategy =  true;
       }
+      if (this.loanProductSettingsForm.value.isInterestRecalculationEnabled) {
+        this.setRescheduleStrategies();
+      }
+      this.processingStrategyService.initialize(this.isAdvancedTransactionProcessingStrategy);
     });
+  }
+
+  private setRescheduleStrategies() {
+    if (this.advancedTransactionProcessingStrategyDisabled) {
+      this.rescheduleStrategyTypeData = this.rescheduleStrategyTypeDataBase.filter(
+        (o: OptionData) => o.id > 3
+      );
+      this.loanProductSettingsForm.patchValue({
+        'rescheduleStrategyMethod': this.rescheduleStrategyTypeData[0].id
+      });
+      this.rescheduleStrategyTypeDisabled = true;
+    } else {
+      this.rescheduleStrategyTypeData = this.rescheduleStrategyTypeDataBase.filter(
+        (o: OptionData) => o.id < 4
+      );
+      this.loanProductSettingsForm.patchValue({
+        'rescheduleStrategyMethod': this.rescheduleStrategyTypeData[0].id
+      });
+      this.rescheduleStrategyTypeDisabled = false;
+    }
   }
 
   private getGlobalConfigValue(configName: string): number {
@@ -508,17 +536,22 @@ export class LoanProductSettingsStepComponent implements OnInit {
 
   get loanProductSettings() {
     const productSettings = this.loanProductSettingsForm.value;
-    if (!this.loanProductSettingsForm.value.multiDisburseLoan) {
-      delete productSettings['disableScheduleExtensionForDownPayment'];
-    }
     if (this.loanProductSettingsForm.value.useDueForRepaymentsConfigurations) {
       productSettings['dueDaysForRepaymentEvent'] = null;
       productSettings['overDueDaysForRepaymentEvent'] = null;
     }
     if (productSettings['delinquencyBucketId'] === '') {
-      delete productSettings['delinquencyBucketId'];
+      productSettings['delinquencyBucketId'] = null;
     }
     return productSettings;
   }
 
+  private validateAdvancedPaymentStrategyControls(): void {
+    if (this.isAdvancedTransactionProcessingStrategy) {
+      this.loanProductSettingsForm.addControl('loanScheduleProcessingType', new UntypedFormControl(
+        this.loanProductsTemplate.loanScheduleProcessingType.code || LoanProducts.LOAN_SCHEDULE_PROCESSING_TYPE_HORIZONTAL, [Validators.required]));
+    } else {
+      this.loanProductSettingsForm.removeControl('loanScheduleProcessingType');
+    }
+  }
 }

@@ -148,7 +148,7 @@ export class RecurringDepositsAccountViewComponent implements OnInit {
   reload() {
     const clientId = this.recurringDepositsAccountData.clientId;
     const url: string = this.router.url;
-    this.router.navigateByUrl(`/clients/${clientId}/recurringdeposits`, { skipLocationChange: true })
+    this.router.navigateByUrl(`/clients/${clientId}/recurring-deposits-accounts`, { skipLocationChange: true })
       .then(() => this.router.navigate([url]));
   }
 
@@ -164,7 +164,7 @@ export class RecurringDepositsAccountViewComponent implements OnInit {
       case 'Reject':
       case 'Undo Approval':
       case 'Add Charge':
-      case 'Withdrawn by client':
+      case 'Withdrawn by Client':
       case 'Premature Close':
       case 'Close':
       case 'Deposit':
@@ -230,7 +230,7 @@ export class RecurringDepositsAccountViewComponent implements OnInit {
   private postInterest() {
     const postInterestAccountDialogRef = this.dialog.open(RecurringDepositConfirmationDialogComponent, {
       data: { heading: this.translateService.instant('labels.heading.Post Interest'),
-        dialogContext: this.translateService.instant('lables.dialogContext.Are you sure you want to post interest ?')
+        dialogContext: this.translateService.instant('labels.text.Are you sure you want to post interest') + ' ?'
       }
     });
     postInterestAccountDialogRef.afterClosed().subscribe((response: any) => {

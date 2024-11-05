@@ -18,9 +18,6 @@
       margin: 0 2%;
       line-height: 25px;
     }
-    .select-row:hover {
-      cursor: pointer;
-    }
     .strike {
       text-decoration: line-through;
       color: $status-active-overdue;
@@ -34,17 +31,7 @@
   }
 }
 
-.active {
-  background-color: $status-active;
-  height: 4px;
-}
-
-.linked {
-  background-color: $status-approved;
-  height: 4px;
-}
-
-.undo {
-  background-color: $status-active-overdue;
-  height: 4px;
+.select-row:hover {
+  cursor: pointer;
+  font-weight: 800;
 }

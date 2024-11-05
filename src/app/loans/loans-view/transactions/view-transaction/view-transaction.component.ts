@@ -33,6 +33,7 @@ export class ViewTransactionComponent implements OnInit {
 
   /** Transaction data. */
   transactionData: any;
+  transactionType: LoanTransactionType;
   /** Is Editable */
   allowEdition = true;
   /** Is Undoable */
@@ -72,9 +73,10 @@ export class ViewTransactionComponent implements OnInit {
     private alertService: AlertService) {
     this.route.data.subscribe((data: { loansAccountTransaction: any }) => {
       this.transactionData = data.loansAccountTransaction;
+      this.transactionType = this.transactionData.type;
       this.allowEdition = !this.transactionData.manuallyReversed && !this.allowTransactionEdition(this.transactionData.type.id);
       this.allowUndo = !this.transactionData.manuallyReversed;
-      this.allowChargeback = this.allowChargebackTransaction(this.transactionData.type) && !this.transactionData.manuallyReversed;
+      this.allowChargeback = this.allowChargebackTransaction(this.transactionType) && !this.transactionData.manuallyReversed;
       let transactionsChargebackRelated = false;
       if (this.allowChargeback) {
         if (this.transactionData.transactionRelations) {
@@ -89,18 +91,19 @@ export class ViewTransactionComponent implements OnInit {
           });
           this.amountRelationsAllowed = this.transactionData.amount - amountRelations;
           this.isFullRelated = (this.amountRelationsAllowed === 0);
-          this.allowChargeback = this.allowChargebackTransaction(this.transactionData.type) && !this.isFullRelated;
+          this.allowChargeback = this.allowChargebackTransaction(this.transactionType) && !this.isFullRelated;
         }
       }
       if (!this.allowChargeback) {
         this.allowEdition = false;
       }
-      if (this.existTransactionRelations && transactionsChargebackRelated) {
+      if ((this.existTransactionRelations && transactionsChargebackRelated) || this.transactionType.reAge || this.transactionType.reAmortize) {
         this.allowUndo = false;
       }
     });
     this.clientId = this.route.snapshot.params['clientId'];
     this.loanId = this.route.snapshot.params['loanId'];
+    console.log(this.transactionType);
   }
 
   ngOnInit(): void {
@@ -118,13 +121,13 @@ export class ViewTransactionComponent implements OnInit {
   allowTransactionEdition(transactionType: number): boolean {
     return (transactionType === 20
       || transactionType === 21 || transactionType === 22
-      || transactionType === 23);
+      || transactionType === 23 || transactionType === 28);
   }
 
   allowChargebackTransaction(transactionType: LoanTransactionType): boolean {
-    return (transactionType.repayment
+    return (transactionType.repayment || transactionType.interestPaymentWaiver
       || transactionType.goodwillCredit || transactionType.payoutRefund
-      || transactionType.merchantIssuedRefund);
+      || transactionType.merchantIssuedRefund || transactionType.downPayment);
   }
 
   /**
@@ -174,7 +177,7 @@ export class ViewTransactionComponent implements OnInit {
       })
     ];
     const data = {
-      title: 'Chargeback Repayment Transaction',
+      title: `Chargeback ${this.transactionType.value} Transaction`,
       layout: { addButtonText: 'Chargeback' },
       formfields: formfields
     };
