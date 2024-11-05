@@ -9,10 +9,10 @@ export const environment = {
   version: env.mifos_x.version,
   hash: env.mifos_x.hash,
   // For connecting to server running elsewhere update the tenant identifier
-  fineractPlatformTenantId: window['env']['fineractPlatformTenantId'] || ['kemetx'],
-  fineractPlatformTenantIds: window['env']['fineractPlatformTenantIds'] || ['kemetx'],
+  fineractPlatformTenantId: window['env']['fineractPlatformTenantId'] || 'kemetx',
+  fineractPlatformTenantIds: window['env']['fineractPlatformTenantIds'] || 'kemetx',
   // For connecting to others servers running elsewhere update the base API URL
-  baseApiUrls: window['env']['fineractApiUrls'] ||'https://api.vuna.io',
+  baseApiUrls: window['env']['fineractApiUrls'] || 'https://api.vuna.io',
   // For connecting to server running elsewhere set the base API URL
   baseApiUrl: window['env']['fineractApiUrl'] || 'https://api.vuna.io',
   allowServerSwitch: env.allow_switching_backend_instance,
